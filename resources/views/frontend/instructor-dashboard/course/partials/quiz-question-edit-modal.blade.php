@@ -24,6 +24,9 @@
         </div>
 
        {{-- UPDATED: Image URL Section with Preview --}}
+                <a class="btn btn-success" target="_blank" href="{{ route('student.image-gallery.index') }}">
+                    <i class="fas fa-images"></i> {{ __('Image Gallery') }}
+                </a>
         <div class="form-group mb-3 mt-3">
             <label class="form-label" for="image">{{ __('Question Image URL (Optional)') }}</label>
             <input type="url" class="form-control" name="image" id="image" value="{{ old('image', $question->image) }}" placeholder="https://example.com/image.jpg">
@@ -31,12 +34,12 @@
                 <small>{{ __('Image Preview:') }}</small>
                 <img src="{{ $question->image ?? '' }}" alt="Image Preview" class="img-fluid" style="max-height: 100px;">
             </div>
-            @if($question->image)
+            <!-- @if($question->image)
                 <div class="mt-2">
                     <small>{{ __('Current Image:') }}</small>
                     <img src="{{ $question->image }}" alt="Question Image" class="img-fluid" style="max-height: 100px;">
                 </div>
-            @endif
+            @endif -->
         </div>
         {{-- END of Image URL Section --}}
 

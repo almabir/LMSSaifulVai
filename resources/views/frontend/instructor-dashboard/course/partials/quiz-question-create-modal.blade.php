@@ -24,8 +24,14 @@
         </div>
 
        {{-- UPDATED: Image URL Section with Preview --}}
+       
+                <a class="btn btn-success" target="_blank" href="{{ route('student.image-gallery.index') }}">
+                    <i class="fas fa-images"></i> {{ __('Image Gallery') }}
+                </a>
+            
         <div class="form-group mb-3 mt-3">
             <label class="form-label" for="image">{{ __('Question Image URL (Optional)') }}</label>
+            
             <input type="url" class="form-control" name="image" id="image" placeholder="https://example.com/image.jpg">
             <div id="image-preview" class="mt-2 d-none">
                 <small>{{ __('Image Preview:') }}</small>

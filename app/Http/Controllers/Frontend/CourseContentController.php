@@ -445,7 +445,7 @@ class CourseContentController extends Controller
     //     return response()->json(['status' => 'success', 'message' => __('Question created successfully')]);
     // }
 
-        public function storeQuizQuestion(Request $request, string $quizId)
+    public function storeQuizQuestion(Request $request, string $quizId)
     {
         Log::info('Request inputs:', $request->all());
         Log::info('Image field present:', ['image' => $request->input('image')]);
@@ -468,7 +468,8 @@ class CourseContentController extends Controller
             'quiz_id'     => $quizId,
             'title'       => $request->title,
             'explanation' => $request->explanation,
-            'image'       => $request->input('image'),
+            // 'image'       => $request->input('image'),
+            'image'       => $request->image,
             'grade'       => $request->grade,
             'type'        => 'multiple',
         ]);
@@ -527,6 +528,7 @@ class CourseContentController extends Controller
     function editQuizQuestion(string $questionId)
     {
         $question = QuizQuestion::findOrFail($questionId);
+        // Log::info($question);
         return view('frontend.instructor-dashboard.course.partials.quiz-question-edit-modal', ['question' => $question])->render();
     }
 
@@ -676,9 +678,10 @@ class CourseContentController extends Controller
     function destroyQuizQuestion(string $questionId)
     {
         $question = QuizQuestion::findOrFail($questionId);
-        if ($question->image && File::exists(public_path($question->image))) {
-            File::delete(public_path($question->image));
-        }
+        
+        // if ($question->image && File::exists(public_path($question->image))) {
+        //     File::delete(public_path($question->image));
+        // }
         $question->answers()->delete();
         $question->delete();
         return response()->json(['status' => 'success', 'message' => __('Question deleted successfully')]);

@@ -16,7 +16,7 @@ return [
      */
 
     'use_package_routes'       => true,
-
+    'use_post_message' => true, // Ensure this line exists and is true
     /*
     |--------------------------------------------------------------------------
     | Shared folder / Private folder

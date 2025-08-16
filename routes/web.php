@@ -30,6 +30,21 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Frontend\AffiliateController;
 use App\Http\Controllers\Frontend\AffiliateLinkController;
 use App\Http\Controllers\Frontend\AffWithdrawalController;
+use App\Http\Controllers\Frontend\ImageGalleryController; // Add this line
+
+
+
+
+Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'student', 'as' => 'student.'], function () {
+    // ... all your other student dashboard routes ...
+
+    // Image Gallery Routes
+    Route::get('image-gallery', [ImageGalleryController::class, 'index'])->name('image-gallery.index');
+    Route::post('image-gallery/upload', [ImageGalleryController::class, 'store'])->name('image-gallery.store');
+    Route::delete('image-gallery/{id}', [ImageGalleryController::class, 'destroy'])->name('image-gallery.destroy');
+
+    // ... (rest of your student group routes) ...
+});
 
 Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'student', 'as' => 'student.'], function () {
     
