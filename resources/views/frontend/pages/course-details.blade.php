@@ -15,7 +15,7 @@
     <!-- breadcrumb-area -->
     <x-frontend.breadcrumb :title="__('Course Details')" :links="[
         ['url' => route('home'), 'text' => __('Home')],
-        ['url' => '#', 'text' => __('Course Details')],
+        ['url' => route('become-instructor'), 'text' => __('Course Details')],
     ]" />
     <!-- breadcrumb-area-end -->
 
@@ -92,6 +92,7 @@
                                 aria-labelledby="curriculum-tab" tabindex="0">
                                 <div class="courses__curriculum-wrap">
                                     <h3 class="title">{{ __('Course Curriculum') }}</h3>
+                                    <p></p>
                                     <div class="accordion" id="accordionExample">
                                         @foreach ($course->chapters as $chapter)
                                             <div class="accordion-item">
@@ -110,7 +111,104 @@
                                                     <div class="accordion-body">
                                                         <ul class="list-wrap">
                                                             @foreach ($chapter->chapterItems as $chapterItem)
-                                                                {{-- Lesson and Quiz items logic --}}
+                                                                @if ($chapterItem->type == 'lesson')
+                                                                    @if ($chapterItem->lesson?->is_free == 1)
+                                                                        @if ($chapterItem->lesson?->file_type == 'video')
+                                                                            @if ($chapterItem->lesson->storage == 'google_drive')
+                                                                                <li class="course-item open-item">
+                                                                                    <a href="javascript:;"
+                                                                                        data-bs-toggle="modal"
+                                                                                        data-bs-target="#videoModal"
+                                                                                        data-bs-video="https://drive.google.com/file/d/{{ extractGoogleDriveVideoId($chapterItem->lesson->file_path) }}/preview"
+                                                                                        class="course-item-link">
+                                                                                        <span
+                                                                                            class="item-name">{{ $chapterItem->lesson->title }}</span>
+                                                                                        <div class="course-item-meta">
+                                                                                            <span
+                                                                                                class="item-meta duration">{{ minutesToHours($chapterItem->lesson?->duration) }}</span>
+                                                                                        </div>
+                                                                                    </a>
+                                                                                </li>
+                                                                            @else
+                                                                                <li class="course-item open-item">
+                                                                                    <a href="@if(!in_array($chapterItem->lesson->storage, ['wasabi', 'aws'])) {{$chapterItem->lesson->file_path}} @else {{Storage::disk($chapterItem->lesson->storage)->url($chapterItem->lesson->file_path)}} @endif"
+                                                                                        class="course-item-link popup-video">
+                                                                                        <span
+                                                                                            class="item-name">{{ $chapterItem->lesson->title }}</span>
+                                                                                        <div class="course-item-meta">
+                                                                                            <span
+                                                                                                class="item-meta duration">{{ minutesToHours($chapterItem->lesson?->duration) }}</span>
+                                                                                        </div>
+                                                                                    </a>
+                                                                                </li>
+                                                                            @endif
+                                                                        @else
+                                                                            <li class="course-item">
+                                                                                <a href="javascript:;"
+                                                                                    class="course-item-link">
+                                                                                    <span
+                                                                                        class="item-name">{{ $chapterItem->lesson->title }}</span>
+                                                                                    <div class="course-item-meta">
+                                                                                        <span class="item-meta duration">
+                                                                                            --.-- </span>
+                                                                                        <span
+                                                                                            class="item-meta course-item-status">
+                                                                                            <img src="{{ asset('frontend/img/icons/lock.svg') }}"
+                                                                                                alt="icon">
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </a>
+                                                                            </li>
+                                                                        @endif
+                                                                    @else
+                                                                        <li class="course-item">
+                                                                            <a href="javascript:;"
+                                                                                class="course-item-link">
+                                                                                <span
+                                                                                    class="item-name">{{ $chapterItem->lesson->title }}</span>
+                                                                                <div class="course-item-meta">
+                                                                                    <span
+                                                                                        class="item-meta duration">{{ minutesToHours($chapterItem->lesson?->duration) }}</span>
+                                                                                    <span
+                                                                                        class="item-meta course-item-status">
+                                                                                        <img src="{{ asset('frontend/img/icons/lock.svg') }}"
+                                                                                            alt="icon">
+                                                                                    </span>
+                                                                                </div>
+                                                                            </a>
+                                                                        </li>
+                                                                    @endif
+                                                                @elseif($chapterItem?->type == 'document')
+                                                                    <li class="course-item">
+                                                                        <a href="javascript:;" class="course-item-link">
+                                                                            <span
+                                                                                class="item-name">{{ $chapterItem->lesson->title }}</span>
+                                                                            <div class="course-item-meta">
+                                                                                <span
+                                                                                    class="item-meta duration">{{ minutesToHours($chapterItem->lesson?->duration) }}</span>
+                                                                                <span class="item-meta course-item-status">
+                                                                                    <img src="{{ asset('frontend/img/icons/lock.svg') }}"
+                                                                                        alt="icon">
+                                                                                </span>
+                                                                            </div>
+                                                                        </a>
+                                                                    </li>
+                                                                @else
+                                                                    <li class="course-item">
+                                                                        <a href="javascript:;" class="course-item-link">
+                                                                            <span
+                                                                                class="item-name">{{ $chapterItem->quiz->title }}</span>
+                                                                            <div class="course-item-meta">
+                                                                                <span
+                                                                                    class="item-meta duration">{{ minutesToHours($chapterItem->lesson?->duration) }}</span>
+                                                                                <span class="item-meta course-item-status">
+                                                                                    <img src="{{ asset('frontend/img/icons/lock.svg') }}"
+                                                                                        alt="icon">
+                                                                                </span>
+                                                                            </div>
+                                                                        </a>
+                                                                    </li>
+                                                                @endif
                                                             @endforeach
                                                         </ul>
                                                     </div>
@@ -122,11 +220,210 @@
                             </div>
                             <div class="tab-pane fade" id="instructors-tab-pane" role="tabpanel"
                                 aria-labelledby="instructors-tab" tabindex="0">
-                                {{-- Instructors tab content --}}
+
+                                <div class="courses__instructors-wrap">
+                                    <div class="courses__instructors-thumb">
+                                        <img src="{{ asset($course->instructor->image) }}" alt="img"
+                                            class="instructor-thumb">
+                                    </div>
+                                    <div class="courses__instructors-content">
+                                        <h2 class="title">{{ $course->instructor->name }}</h2>
+                                        <span class="designation">{{ $course->instructor->job_title }}</span>
+                                        <p>{{ $course->instructor->short_bio }}</p>
+                                        <div class="instructor__social">
+                                            <ul class="list-wrap justify-content-start">
+                                                @if ($course->instructor->facebook)
+                                                    <li><a href="{{ $course->instructor->facebook }}"><i
+                                                                class="fab fa-facebook-f"></i></a></li>
+                                                @endif
+                                                @if ($course->instructor->twitter)
+                                                    <li><a href="{{ $course->instructor->twitter }}"><i
+                                                                class="fab fa-twitter"></i></a></li>
+                                                @endif
+                                                @if ($course->instructor->website)
+                                                    <li><a href="{{ $course->instructor->website }}"><i
+                                                                class="fas fa-link"></i></a></li>
+                                                @endif
+                                                @if ($course->instructor->github)
+                                                    <li><a href="{{ $course->instructor->github }}"><i
+                                                                class="fab fa-github"></i></a></li>
+                                                @endif
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                @if ($course->partnerInstructors->count() > 0)
+                                    <h3 class="title mt-3">{{ __('Partner Instructors') }}</h3>
+                                    @foreach ($course->partnerInstructors as $instructor)
+                                        <div class="courses__instructors-wrap">
+                                            <div class="courses__instructors-thumb">
+                                                <img src="{{ asset($instructor->instructor->image) }}" alt="img">
+                                            </div>
+                                            <div class="courses__instructors-content">
+                                                <h2 class="title">{{ $instructor->instructor->name }}</h2>
+                                                <span class="designation">{{ $instructor->instructor->job_title }}</span>
+                                                <p>{{ $instructor->instructor->short_bio }}</p>
+                                                <div class="instructor__social">
+                                                    <ul class="list-wrap justify-content-start">
+                                                        @if ($instructor->instructor->facebook)
+                                                            <li><a href="{{ $instructor->instructor->facebook }}"><i
+                                                                        class="fab fa-facebook-f"></i></a></li>
+                                                        @endif
+                                                        @if ($instructor->instructor->twitter)
+                                                            <li><a href="{{ $instructor->instructor->twitter }}"><i
+                                                                        class="fab fa-twitter"></i></a></li>
+                                                        @endif
+                                                        @if ($instructor->instructor->website)
+                                                            <li><a href="{{ $instructor->instructor->website }}"><i
+                                                                        class="fas fa-link"></i></a></li>
+                                                        @endif
+                                                        @if ($instructor->instructor->github)
+                                                            <li><a href="{{ $instructor->instructor->github }}"><i
+                                                                        class="fab fa-github"></i></a></li>
+                                                        @endif
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @endif
                             </div>
                             <div class="tab-pane fade" id="reviews-tab-pane" role="tabpanel"
                                 aria-labelledby="reviews-tab" tabindex="0">
-                                {{-- Reviews tab content --}}
+                                <div class="courses__rating-wrap">
+                                    <h2 class="title">{{ __('Reviews') }}</h2>
+                                    <div class="course-rate">
+                                        <div class="course-rate__summary">
+                                            <div class="course-rate__summary-value">
+                                                {{ number_format($course->reviews()->whereHas('course')->whereHas('user')->avg('rating'), 1) ?? 0 }}</div>
+                                            <div class="course-rate__summary-stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <div class="course-rate__summary-text">
+                                                {{ $course->reviews()->whereHas('course')->whereHas('user')->where('status', 1)->count() }} {{ __('Ratings') }}
+                                            </div>
+                                        </div>
+                                        @php
+                                            $totalRating = $course->reviews_count;
+                                            $fiveStar = $course
+                                                ->reviews()
+                                                ->where('rating', 5)
+                                                ->where('status', 1)->whereHas('course')->whereHas('user')
+                                                ->count();
+                                            $fourStar = $course
+                                                ->reviews()
+                                                ->where('rating', 4)
+                                                ->where('status', 1)->whereHas('course')->whereHas('user')
+                                                ->count();
+                                            $threeStar = $course
+                                                ->reviews()
+                                                ->where('rating', 3)
+                                                ->where('status', 1)->whereHas('course')->whereHas('user')
+                                                ->count();
+                                            $twoStar = $course
+                                                ->reviews()
+                                                ->where('rating', 2)
+                                                ->where('status', 1)->whereHas('course')->whereHas('user')
+                                                ->count();
+                                            $oneStar = $course
+                                                ->reviews()
+                                                ->where('rating', 1)
+                                                ->where('status', 1)->whereHas('course')->whereHas('user')
+                                                ->count();
+                                            $totalPercentage = $totalRating > 0 ? ($fiveStar / $totalRating) * 100 : 0;
+                                            $fourPercentage = $totalRating > 0 ? ($fourStar / $totalRating) * 100 : 0;
+                                            $threePercentage = $totalRating > 0 ? ($threeStar / $totalRating) * 100 : 0;
+                                            $twoPercentage = $totalRating > 0 ? ($twoStar / $totalRating) * 100 : 0;
+                                            $onePercentage = $totalRating > 0 ? ($oneStar / $totalRating) * 100 : 0;
+                                        @endphp
+                                        <div class="course-rate__details">
+                                            <div class="course-rate__details-row">
+                                                <div class="course-rate__details-row-star">
+                                                    5
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                                <div class="course-rate__details-row-value">
+                                                    <div class="rating-gray"></div>
+                                                    <div class="rating" style="width: {{ $totalPercentage }}%;"
+                                                        title="{{ $totalPercentage }}%"></div>
+                                                    <span class="rating-count">{{ $fiveStar }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="course-rate__details-row">
+                                                <div class="course-rate__details-row-star">
+                                                    4
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                                <div class="course-rate__details-row-value">
+                                                    <div class="rating-gray"></div>
+                                                    <div class="rating" style="width: {{ $fourPercentage }}%;"
+                                                        title="{{ $fourPercentage }}%"></div>
+                                                    <span class="rating-count">{{ $fourStar }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="course-rate__details-row">
+                                                <div class="course-rate__details-row-star">
+                                                    3
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                                <div class="course-rate__details-row-value">
+                                                    <div class="rating-gray"></div>
+                                                    <div class="rating" style="width: {{ $threePercentage }}%;"
+                                                        title="{{ $threePercentage }}%"></div>
+                                                    <span class="rating-count">{{ $threeStar }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="course-rate__details-row">
+                                                <div class="course-rate__details-row-star">
+                                                    2
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                                <div class="course-rate__details-row-value">
+                                                    <div class="rating-gray"></div>
+                                                    <div class="rating" style="width: {{ $twoPercentage }}%;"
+                                                        title="{{ $twoPercentage }}%"></div>
+                                                    <span class="rating-count">{{ $twoStar }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="course-rate__details-row">
+                                                <div class="course-rate__details-row-star">
+                                                    1
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                                <div class="course-rate__details-row-value">
+                                                    <div class="rating-gray"></div>
+                                                    <div class="rating" style="width: {{ $onePercentage }}%;"
+                                                        title="{{ $onePercentage }}%"></div>
+                                                    <span class="rating-count">{{ $oneStar }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @foreach ($reviews as $review)
+                                        <div class="course-review-head">
+                                            <div class="review-author-thumb">
+                                                <img src="{{ asset($review?->user?->image) }}" alt="img">
+                                            </div>
+                                            <div class="review-author-content">
+                                                <div class="author-name">
+                                                    <h5 class="name">{{ $review?->user?->name }}
+                                                        <span>{{ formatDate($review->created_at) }}</span>
+                                                    </h5>
+                                                    <div class="author-rating">
+                                                        @for ($i = 1; $i <= $review->rating; $i++)
+                                                            <i class="fas fa-star"></i>
+                                                        @endfor
+                                                    </div>
+                                                </div>
+                                                <p>{{ $review->review }}</p>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -144,9 +441,65 @@
                             @else
                                 <h2 class="title">{{ currency($course->price) }}</h2>
                             @endif
+
                         </div>
                         <div class="courses__information-wrap">
-                            {{-- Course includes section --}}
+                            <h5 class="title">{{ __('Course includes') }}:</h5>
+                            <ul class="list-wrap">
+                                <li class="level-wrapper">
+                                    <b>
+                                        <img src="{{ asset('frontend/img/icons/course_icon01.svg') }}" alt="img"
+                                            class="injectable">
+                                        {{ __('Level') }}
+                                    </b>
+                                    <ul class="course-level-list">
+                                        @foreach ($course->levels as $level)
+                                            <span class="level">{{ @$level->level->translation->name }}</span>
+                                        @endforeach
+                                    </ul>
+                                </li>
+                                <li>
+                                    <img src="{{ asset('frontend/img/icons/course_icon02.svg') }}" alt="img"
+                                        class="injectable">
+                                    {{ __('Duration') }}
+                                    <span>{{ minutesToHours($course->duration) }}</span>
+                                </li>
+                                <li>
+                                    <img src="{{ asset('frontend/img/icons/course_icon03.svg') }}" alt="img"
+                                        class="injectable">
+                                    {{ __('Lessons') }}
+                                    <span>{{ $courseLessonCount }}</span>
+                                </li>
+                                <li>
+                                    <img src="{{ asset('frontend/img/icons/course_icon04.svg') }}" alt="img"
+                                        class="injectable">
+                                    {{ __('Quizzes') }}
+                                    <span>{{ $courseQuizCount }}</span>
+                                </li>
+                                <li>
+                                    <img src="{{ asset('frontend/img/icons/course_icon05.svg') }}" alt="img"
+                                        class="injectable">
+                                    {{ __('Certifications') }}
+                                    @if ($course->certificate)
+                                        <span>{{ __('Yes') }}</span>
+                                    @else
+                                        <span>{{ __('No') }}</span>
+                                    @endif
+                                </li>
+                                <li class="level-wrapper">
+                                    <b>
+                                        <img src="{{ asset('frontend/img/icons/course_icon06.svg') }}" alt="img"
+                                            class="injectable">
+                                        {{ __('Language') }}
+                                    </b>
+
+                                    <ul class="course-language-list">
+                                        @foreach ($course->languages as $language)
+                                            <span>{{ $language->language->name }}</span>
+                                        @endforeach
+                                    </ul>
+                                </li>
+                            </ul>
                         </div>
                         <div class="courses__details-social">
                             <h5 class="title">{{ __('Share this course') }}:</h5>
@@ -162,8 +515,13 @@
                             <div class="tg-button-wrap">
                                 @if (in_array($course->id, session('enrollments') ?? []))
                                     <a href="{{ route('student.enrolled-courses') }}"
-                                        class="btn btn-two arrow-btn already-enrolled-btn">
+                                        class="btn btn-two arrow-btn already-enrolled-btn" data-id="">
                                         <span class="text">{{ __('Enrolled') }}</span>
+                                        <i class="flaticon-arrow-right"></i>
+                                    </a>
+                                @elseif ($course->enrollments->count() >= $course->capacity && $course->capacity != null)
+                                    <a href="javascript:;" class="btn btn-two arrow-btn" data-id="{{ $course->id }}">
+                                        <span class="text">{{ __('Booked') }}</span>
                                         <i class="flaticon-arrow-right"></i>
                                     </a>
                                 @else
@@ -173,39 +531,33 @@
                                         <i class="flaticon-arrow-right"></i>
                                     </a>
                                 @endif
+
                             </div>
                         </div>
-
-                        {{-- === AFFILIATE LINK SECTION INSERTED HERE === --}}
-                        @if(auth()->check() && auth()->user()->is_affiliate)
-                            <div class="card mt-4">
-                                <div class="card-header">
-                                    <h5>{{ __('Affiliate Program') }}</h5>
-                                </div>
-                                <div class="card-body text-center">
-                                    @if($affiliateLink)
-                                        <p>{{ __("Share your unique link to earn a commission!") }}</p>
-                                        <div class="input-group mb-3">
-                                            <input type="text" id="referral-link" class="form-control" value="{{ route('course.show', ['slug' => $course->slug, 'ref' => $affiliateLink->referral_code]) }}" readonly>
-                                            <button class="btn btn-outline-secondary" type="button" id="copy-btn" onclick="copyToClipboard()">{{ __('Copy') }}</button>
-                                        </div>
-                                    @else
-                                        <p>{{ __("Generate your unique referral link for this course.") }}</p>
-                                        <form action="{{ route('affiliate.link.generate', $course->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn btn-primary">{{ __('Generate My Link') }}</button>
-                                        </form>
-                                    @endif
-                                </div>
-                            </div>
-                        @endif
-                        {{-- === END OF AFFILIATE LINK SECTION === --}}
-
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    <!-- Google Drive player modal Structure -->
+    <div class="google_drive_modal">
+        <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="ratio ratio-16x9">
+                            <iframe class="iframe-video" src="" width="640" height="680" allow="autoplay"
+                                frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- courses-details-area-end -->
 @endsection
 
@@ -214,18 +566,6 @@
     <script src="{{ asset('frontend/js/shareon.iife.js') }}"></script>
     <script>
         Shareon.init();
-
-        function copyToClipboard() {
-            var copyText = document.getElementById("referral-link");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999); // For mobile devices
-            document.execCommand("copy");
-            var copyBtn = document.getElementById("copy-btn");
-            copyBtn.innerText = 'Copied!';
-            setTimeout(function(){
-                copyBtn.innerText = 'Copy';
-            }, 2000);
-        }
     </script>
 
     @if ($setting->google_tagmanager_status == 'active' && $marketing_setting?->course_details)

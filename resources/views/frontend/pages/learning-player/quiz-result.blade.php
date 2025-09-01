@@ -103,8 +103,6 @@
                         @foreach ($quiz->questions as $question)
                             <div class="question-box mt-4">
                                 <h6>{{ $loop->iteration }}. {{ $question->title }}</h6>
-
-                               
                                 <div class="row">
                                     @foreach ($question->answers as $answer)
                                         <div class="col-md-6">
@@ -123,22 +121,16 @@
                                             </div>
                                         </div>
                                     @endforeach
-                                </div>
-                                 <!-- === ADDED EXPLANATION BLOCK === -->
-                                @if ($question->explanation)
-                                <div class="alert alert-info mt-2">
-                                    <strong>{{ __('Explanation') }}:</strong>
-                                    {!! $question->explanation !!}
-                                </div>
-                                @endif
-                                <!-- === END OF EXPLANATION BLOCK === -->
 
+                                </div>
                             </div>
                         @endforeach
+
                     </div>
                 </form>
             </div>
         </div>
+
     </section>
 @endsection
 

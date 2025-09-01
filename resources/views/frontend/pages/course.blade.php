@@ -42,7 +42,7 @@
                             </div>
 
                             <div class="sub-category-holder "></div>
-                            <!-- <div class="courses-widget">
+                            <div class="courses-widget">
                                 <h4 class="widget-title">{{ __('Language') }}</h4>
                                 <div class="courses-cat-list">
                                     <ul class="list-wrap">
@@ -70,7 +70,7 @@
                                 </div>
                                 <div class="show-more">
                                 </div>
-                            </div> -->
+                            </div>
                             <div class="courses-widget">
                                 <h4 class="widget-title">{{ __('Price') }}</h4>
                                 <div class="courses-cat-list">
