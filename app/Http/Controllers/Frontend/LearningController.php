@@ -202,30 +202,72 @@ class LearningController extends Controller {
         return view('frontend.pages.learning-player.quiz-index', compact('quiz', 'attempt'));
     }
 
-    function quizStore(Request $request, string $id) {
+    // function quizStore(Request $request, string $id) {
+    //     $grad = 0;
+    //     $result = [];
+    //     $quiz = Quiz::findOrFail($id);
+    //     foreach ($request->question ?? [] as $key => $questionAns) {
+    //         $question = QuizQuestion::findOrFail($key);
+    //         $answer = $question->answers->where('correct', 1)->pluck('id')->toArray();
+
+    //         if (in_array($questionAns, $answer)) {
+    //             $grad += $question->grade;
+    //         }
+    //         $result[$key] = [
+    //             "answer"  => $questionAns,
+    //             "correct" => in_array($questionAns, $answer),
+    //         ];
+    //     }
+
+    //     $quizResult = QuizResult::create([
+    //         'user_id'    => userAuth()->id,
+    //         'quiz_id'    => $id,
+    //         'result'     => json_encode($result),
+    //         'user_grade' => $grad,
+    //         'status'     => $grad >= $quiz->pass_mark ? 'pass' : 'failed',
+    //     ]);
+    //     return redirect()->route('student.quiz.result', ['id' => $id, 'result_id' => $quizResult->id]);
+    // }
+
+    public function quizStore(Request $request, string $id)
+    {
         $grad = 0;
         $result = [];
         $quiz = Quiz::findOrFail($id);
+
         foreach ($request->question ?? [] as $key => $questionAns) {
             $question = QuizQuestion::findOrFail($key);
-            $answer = $question->answers->where('correct', 1)->pluck('id')->toArray();
+            $correctAnswers = $question->answers->where('correct', 1)->pluck('id')->toArray();
 
-            if (in_array($questionAns, $answer)) {
+            $isCorrect = in_array($questionAns, $correctAnswers);
+
+            if ($isCorrect) {
+                // Add points for a correct answer
                 $grad += $question->grade;
+            } else {
+                // If negative marking is enabled, deduct points
+                if ($quiz->negative_marking && $quiz->negative_marks > 0) {
+                    $grad -= $quiz->negative_marks;
+                }
             }
+            
             $result[$key] = [
                 "answer"  => $questionAns,
-                "correct" => in_array($questionAns, $answer),
+                "correct" => $isCorrect,
             ];
         }
 
+        // Ensure the final grade does not go below zero
+        $finalGrade = max(0, $grad);
+
         $quizResult = QuizResult::create([
-            'user_id'    => userAuth()->id,
+            'user_id'    => auth()->id(),
             'quiz_id'    => $id,
             'result'     => json_encode($result),
-            'user_grade' => $grad,
-            'status'     => $grad >= $quiz->pass_mark ? 'pass' : 'failed',
+            'user_grade' => $finalGrade,
+            'status'     => $finalGrade >= $quiz->pass_mark ? 'pass' : 'failed',
         ]);
+        
         return redirect()->route('student.quiz.result', ['id' => $id, 'result_id' => $quizResult->id]);
     }
 

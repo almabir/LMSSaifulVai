@@ -119,9 +119,21 @@
                                                     </div>
                                                 </label>
                                             </div>
+                                            
                                         </div>
+                                        
                                     @endforeach
-
+                                            @if ($question->explanation)
+                                            
+                                            <h6 class="border-bottom">Question Explanation: </h6>
+                                            <div class="row">
+                                                <div class="col-md-10 mx-auto">
+                                                    <span class="card ans-body mx-[-15] bg-info">
+                                                {{$question->explanation}}
+                                            </span>
+                                                </div>
+                                            </div>
+                                            @endif
                                 </div>
                             </div>
                         @endforeach

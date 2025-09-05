@@ -82,6 +82,9 @@
                         @foreach ($quiz->questions as $question)
                             <div class="question-box mt-4">
                                 <h6>{{ $loop->iteration }}. {{ $question->title }}</h6>
+                                @if ($question->image)
+                                <img src="{{ $question->image }}" height="250"/>
+                                @endif
                                 <div class="row">
                                     @foreach ($question->answers as $answer)
                                         <div class="col-md-6">
